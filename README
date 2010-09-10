@@ -12,6 +12,6 @@ INSTALLATION
 Create a file named 'config' with a content that looks like the following:
 
 nick:nflbot
-pass:nickserv_password
+password:nickserv_password
 channels:#channel1,#channel2
 server:irc.example.org
