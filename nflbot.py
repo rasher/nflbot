@@ -51,7 +51,8 @@ def gamesort(a, b):
 
 def getconfig(v):
     c = dict([x.split(':') for x in open('config').readlines()])
-    return c[v]
+    print("Get %s from config: %r" % (v,c))
+    return c[v].strip()
 
 class Team():
     city = ""
@@ -479,9 +480,7 @@ class NFLBot(irc.IRCClient):
 
     def connectionLost(self, reason):
         print "Lost connection: %s" % reason
-        reactor.stop()
         self.isconnected = False
-        sys.exit()
 
     def privmsg(self, user, channel, message):
         nick = user.split("!")[0]
