@@ -51,7 +51,6 @@ def gamesort(a, b):
 
 def getconfig(v):
     c = dict([x.split(':') for x in open('config').readlines()])
-    print("Get %s from config: %r" % (v,c))
     return c[v].strip()
 
 class Team():
@@ -362,7 +361,6 @@ class NFLBot(irc.IRCClient):
 
     def updateteamplayers(self, team):
         url = "http://www.nfl.com/teams/roster?team=%s" % team
-        print "Get %s" % url
         data = urllib2.urlopen(url).read()
         m = re.finditer('<tr class="(?:odd|even)">\s+<td>\s*(?P<number>[0-9]*)\s*</td>\s+<td[^>]*>\s*<a[^>]*>(?P<lastname>[^,]*),\s*(?P<firstname>[^<]*?)\s*</a></td>\s+<td>(?P<pos>[^<]*)</td>\s+<td>(?P<status>[^<]*)</td>\s+<td>\s*(?P<height>[^<]*)\s*</td>\s+<td>\s*(?P<weight>[^<]*)\s*</td>\s+<td>\s*(?P<birthmonth>[0-9]*)/(?P<birthday>[0-9]*)/(?P<birthyear>[0-9]*)\s*</td>\s+<td>\s*(?P<exp>[^<]*)\s*</td>\s+<td>\s*(?P<college>[^<]*)\s*</td>\s*</tr>', data)
         players = []
