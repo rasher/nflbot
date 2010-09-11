@@ -154,9 +154,6 @@ class NFLBot(irc.IRCClient):
                 "http://www.nfl.com/rss/rsslanding?searchString=team&abbr=%s" % team
              ))
         self.generalfeeds = [
-#            (None, "http://tv2sport.dk/rss/*/5/*/*/*/*"),
-#            (None, "http://tv2sport.dk/rss/eblog/*/*/*/*/elming"),
-#            (None, "http://tv2sport.dk/rss/eblog/*/*/*/*/jorgenbach"),
             (None, "http://www.nfl.com/rss/rsslanding?searchString=home"),
             (None, "http://www.nfl.com/rss/rsslanding?searchString=events&id=pro_bowl"),
             (None, "http://www.nfl.com/rss/rsslanding?searchString=events&id=playoffs"),
@@ -168,10 +165,6 @@ class NFLBot(irc.IRCClient):
             (None, "http://www.nfl.com/rss/rsslanding?searchString=eventVideo&id=playoffs"),
             # Twitter
             (None, "http://twitter.com/statuses/user_timeline/40519997.rss"),
-#            (None, "http://twitter.com/statuses/user_timeline/18785654.rss"),
-#            (None, "http://twitter.com/statuses/user_timeline/18369265.rss"),
-#            (None, "http://twitter.com/statuses/user_timeline/142267670.rss"),
-#            (None, "http://twitter.com/statuses/user_timeline/40935656.rss"),
         ]
         for team in self.teams:
             if team not in ['AFC', 'NFC', 'SL']:
@@ -424,14 +417,12 @@ class NFLBot(irc.IRCClient):
         tosay = {}
         for team, url in self.teamfeeds + self.generalfeeds:
             try:
-                #print "Reading %s" % url
                 feed = feedparser.parse(url)
             except Exception, e:
                 print(e)
             else:
                 for entry in feed.entries:
                     if entry.link in self.seenurls:
-                        #print "  Seen %s" % entry.link
                         continue
                     print "  ***NEW***: %s - %s" % (entry.title, entry.link)
                     self.seenurls.append(entry.link)
@@ -468,8 +459,6 @@ class NFLBot(irc.IRCClient):
         self.msg("nickserv", "identify %s" % getconfig('password'))
         for channel in self.factory.channels:
             self.join(channel)
-        #self.looper = task.LoopingCall(self.getcurrent)
-        #self.looper.start(15)
         self.isconnected = True
         if not self.alreadyrunning:
             reactor.callLater(10, self.gameloop, firstrun=True)
@@ -490,8 +479,6 @@ class NFLBot(irc.IRCClient):
 
         matchers = [
                 (re.compile("^(?P<team>[A-Z]{2,3}) +(?P<query>.*)$"), self.playerquery),
-#                (re.compile("^dumprss$"), self.dumprss),
-#                (re.compile("^(?i)kampe$"), self.saygames),
         ]
         for regex, callback in matchers:
             m = regex.search(message)
