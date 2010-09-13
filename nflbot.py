@@ -228,9 +228,12 @@ class NFLBot(irc.IRCClient):
 
     def sayall(self, msg):
         for channel in self.factory.channels:
-            print("<%s @ %s> %s" % (self.nickname, channel, msg))
             self.msg(channel, msg)
             self.lastmsg = datetime.now()
+
+    def msg(self, target, msg, *args, **kwargs):
+        print "<%s@%s> %s" % (self.nickname, target, msg)
+        super.msg(target, msg, args, kwargs)
 
     def saygame(self, game, oldgame):
         if game == None:
