@@ -388,7 +388,7 @@ class NFLBot(irc.IRCClient):
         return v
 
     def sayplayer(self, target, v):
-        msg = "%(team_shortirc)s #%(number)s %(fullname)s (%(pos)s), %(years)d, %(mheight).2fm, %(mweight).fkg, %(exp_s)s, %(college)s - %(wp)s" % v
+        msg = "%(team_shortirc)s #%(number)s %(fullname)s (%(pos)s), %(years)d years, %(status), %(height)s (%(mheight).2fm), %(weight) (%(mweight).fkg), %(exp_s)s, %(college)s - %(wp)s" % v
         self.msg(target, msg)
 
     def playerquery(self, target=None, team=None, query=None):
