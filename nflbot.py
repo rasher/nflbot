@@ -231,9 +231,9 @@ class NFLBot(irc.IRCClient):
             self.msg(channel, msg)
             self.lastmsg = datetime.now()
 
-    def msg(self, target, msg, *args, **kwargs):
+    def msg(self, target, msg):
         print "<%s@%s> %s" % (self.nickname, target, msg)
-        super.msg(target, msg, args, kwargs)
+        irc.IRCClient.msg(self, target, msg)
 
     def saygame(self, game, oldgame):
         if game == None:
@@ -388,7 +388,7 @@ class NFLBot(irc.IRCClient):
         return v
 
     def sayplayer(self, target, v):
-        msg = "%(team_shortirc)s #%(number)s %(fullname)s (%(pos)s), %(years)d years, %(status), %(height)s (%(mheight).2fm), %(weight) (%(mweight).fkg), %(exp_s)s, %(college)s - %(wp)s" % v
+        msg = "%(team_shortirc)s #%(number)s %(fullname)s (%(pos)s), %(years)d years, %(status)s, %(height)s (%(mheight).2fm), %(weight)s lbs (%(mweight).fkg), %(exp_s)s, %(college)s - %(wp)s" % v
         self.msg(target, msg)
 
     def playerquery(self, target=None, team=None, query=None):
