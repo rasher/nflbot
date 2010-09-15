@@ -392,21 +392,20 @@ class NFLBot(irc.IRCClient):
         self.msg(target, msg)
 
     def playerquery(self, target=None, team=None, query=None):
-        if None in (target, team, query):
+        if None in (target, team, query) or team not in self.playerdetails or len(query.strip()) < 3:
             return False
-        if team in self.playerdetails:
-            if datetime.now() - self.playerdetails[team]['updated'] > timedelta(hours=24):
-                self.updateteamplayers(team)
-            found = False
-            for player in self.playerdetails[team]['players']:
-                if query.isdigit() and query == player['number']:
-                    self.sayplayer(target, player)
-                    return True
-                elif query.lower() in player['lastname'].lower() or query.lower() in player['fullname'].lower():
-                    self.sayplayer(target, player)
-                    found = True
-            if found == True:
+        if datetime.now() - self.playerdetails[team]['updated'] > timedelta(hours=24):
+            self.updateteamplayers(team)
+        found = False
+        for player in self.playerdetails[team]['players']:
+            if query.isdigit() and query == player['number']:
+                self.sayplayer(target, player)
                 return True
+            elif query.lower() in player['lastname'].lower() or query.lower() in player['fullname'].lower():
+                self.sayplayer(target, player)
+                found = True
+        if found == True:
+            return True
         self.msg(target, "%s %s not found" % (team, query))
         return False
 
