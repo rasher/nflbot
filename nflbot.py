@@ -463,7 +463,7 @@ class NFLBot(irc.IRCClient):
         print("<%s@%s> %s" % (nick, target, message))
 
         matchers = [
-                (re.compile("^(?P<team>[A-Z]{2,3}) +(?P<query>.*)$"), self.playerquery),
+                (re.compile("^%s[:,] (?P<team>[A-Z]{2,3}) +(?P<query>.*)$" % self.nickname), self.playerquery),
         ]
         for regex, callback in matchers:
             m = regex.search(message)
