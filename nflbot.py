@@ -100,7 +100,6 @@ class Team():
 class NFLBot(irc.IRCClient):
     nickname = getconfig('nick')
     alreadyrunning = False
-    isconnected = False
     games = {}
     bps = []
     playerdetails = {}
@@ -299,12 +298,6 @@ class NFLBot(irc.IRCClient):
         return start
 
     def gameloop(self, firstrun=False):
-        if not self.isconnected:
-            nextupdate = timedelta(minutes=3)
-            reactor.callLater(nextupdate.seconds, self.gameloop)
-            print("Not connected. Trying again at: %s (in %d seconds)" % (datetime.now() + nextupdate, nextupdate.seconds))
-            return False
-
         print("%-18s - " % "Update gamestatus"),
         url = "http://gaia.local/nfl/"
         url = "http://static.nfl.com/liveupdate/scorestrip/postseason/ss.xml"
@@ -392,7 +385,7 @@ class NFLBot(irc.IRCClient):
         self.msg(target, msg)
 
     def playerquery(self, target=None, team=None, query=None):
-        if None in (target, team, query) or team not in self.playerdetails or len(query.strip()) < 3:
+        if None in (target, team, query) or team not in self.playerdetails or (len(query.strip()) < 3 and not query.strip().isdigit()):
             return False
         if datetime.now() - self.playerdetails[team]['updated'] > timedelta(hours=24):
             self.updateteamplayers(team)
@@ -410,12 +403,6 @@ class NFLBot(irc.IRCClient):
         return False
 
     def rssloop(self, firstrun=False):
-        if not self.isconnected:
-            nextupdate = timedelta(minutes=3)
-            reactor.callLater(nextupdate.seconds, self.rssloop)
-            print("Not connected. Trying again at: %s (in %d seconds)" % (datetime.now() + nextupdate, nextupdate.seconds))
-            return False
-
         tosay = {}
         for team, url in self.teamfeeds + self.generalfeeds:
             try:
@@ -461,15 +448,11 @@ class NFLBot(irc.IRCClient):
         self.msg("nickserv", "identify %s" % getconfig('password'))
         for channel in self.factory.channels:
             self.join(channel)
-        self.isconnected = True
         if not self.alreadyrunning:
             reactor.callLater(10, self.gameloop, firstrun=True)
             reactor.callLater(10, self.rssloop, firstrun=True)
             self.alreadyrunning = True
 
-    def connectionLost(self, reason):
-        print "Lost connection: %s" % reason
-        self.isconnected = False
 
     def privmsg(self, user, channel, message):
         nick = user.split("!")[0]
