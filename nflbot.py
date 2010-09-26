@@ -118,6 +118,7 @@ class NFLBot(irc.IRCClient):
         "DET": Team("Detroit", "Lions", "white", "lightblue", "Ford Field", "DET"),
         "GB":  Team("Green Bay", "Packers", "yellow", "green", "Lambeau Field", "GB"),
         "HOU": Team("Houston", "Texans", "red", "blue", "Reliant Stadium", "HOU"),
+        "HST": Team("Houston", "Texans", "red", "blue", "Reliant Stadium", "HOU"),
         "IND": Team("Indianapolis", "Colts", "white", "lightblue", "Lucas Oil Stadium", "IND"),
         "JAC": Team("Jacksonville", "Jaguars", "white", "blue", "Jacksonville Municipal Stadium", "JAC"),
         "KC":  Team("Kansas City", "Chiefs", "white", "red", "Arrowhead Stadium", "KC"),
@@ -166,7 +167,7 @@ class NFLBot(irc.IRCClient):
             (None, "http://twitter.com/statuses/user_timeline/40519997.rss"),
         ]
         for team in self.teams:
-            if team not in ['AFC', 'NFC', 'SL']:
+            if team not in ['AFC', 'NFC', 'SL', 'ARZ', 'HST']:
                 self.updateteamplayers(team)
 
 
@@ -428,7 +429,7 @@ class NFLBot(irc.IRCClient):
         tosay.sort(lambda x, y: cmp(x[2], y[2]))
         for link, title, date, teams in tosay:
             start = ""
-            if teams != []:
+            if len(teams) > 0:
                 start = "%s: " % ", ".join(teams)
             msg = "%s%s - %s" % (start, title, link)
             self.sayall(msg.encode('utf-8'))
