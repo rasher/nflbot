@@ -113,6 +113,7 @@ class NFLBot(irc.IRCClient):
         "CHI": Team("Chicago", "Bears", "orange", "lightblue", "Soldier Field", "CHI"),
         "CIN": Team("Cincinnati", "Bengals", "black", "orange", "Paul Brown Stadium", "CIN"),
         "CLE": Team("Cleveland", "Browns", "white", "orange", "Cleveland Browns Stadium", "CLE"),
+        "CLV": Team("Cleveland", "Browns", "white", "orange", "Cleveland Browns Stadium", "CLE"),
         "DAL": Team("Dallas", "Cowboys", "blue", "lightgrey", "Cowboys Stadium", "DAL"),
         "DEN": Team("Denver", "Broncos", "orange", "lightblue", "INVESCO Field at Mile High", "DEN"),
         "DET": Team("Detroit", "Lions", "white", "lightblue", "Ford Field", "DET"),
@@ -121,6 +122,7 @@ class NFLBot(irc.IRCClient):
         "HST": Team("Houston", "Texans", "red", "blue", "Reliant Stadium", "HOU"),
         "IND": Team("Indianapolis", "Colts", "white", "lightblue", "Lucas Oil Stadium", "IND"),
         "JAC": Team("Jacksonville", "Jaguars", "white", "blue", "Jacksonville Municipal Stadium", "JAC"),
+        "JAX": Team("Jacksonville", "Jaguars", "white", "blue", "Jacksonville Municipal Stadium", "JAC"),
         "KC":  Team("Kansas City", "Chiefs", "white", "red", "Arrowhead Stadium", "KC"),
         "MIA": Team("Miami", "Dolphins", "orange", "teal", "Land Shark Stadium", "MIA"),
         "MIN": Team("Minnesota", "Vikings", "white", "purple", "Hubert H. Humphrey Metrodome", "MIN"),
@@ -150,7 +152,7 @@ class NFLBot(irc.IRCClient):
         self.lastmsg = datetime.now()
         for team in self.teams:
             self.teamfeeds.append((
-                self.teams[team],
+                self.teams[team].shortirc(),
                 "http://www.nfl.com/rss/rsslanding?searchString=team&abbr=%s" % team
              ))
         self.generalfeeds = [
@@ -217,7 +219,10 @@ class NFLBot(irc.IRCClient):
         if game['q'] == 'F' or game['q'] == 'FO':
             v['u']=chr(0x1f)
         elif game['q'] in ('1', '2', '3', '4', '5'):
-            v['time'] += " %s" % game['k']
+            try:
+                v['time'] += " %s" % game['k']
+            except KeyError:
+                v['time'] += " ???"
 
         if game['q'] == 'P':
             fmt = "%(away)s @ %(home)s %(start_s)s in %(stadium)s"
@@ -351,7 +356,10 @@ class NFLBot(irc.IRCClient):
 
     def updateteamplayers(self, team):
         url = "http://www.nfl.com/teams/roster?team=%s" % team
-        data = urllib2.urlopen(url).read()
+        try:
+            data = urllib2.urlopen(url).read()
+        except Exception as e:
+            data = ""
         m = re.finditer('<tr class="(?:odd|even)">\s+<td>\s*(?P<number>[0-9]*)\s*</td>\s+<td[^>]*>\s*<a[^>]*>(?P<lastname>[^,]*),\s*(?P<firstname>[^<]*?)\s*</a></td>\s+<td>(?P<pos>[^<]*)</td>\s+<td>(?P<status>[^<]*)</td>\s+<td>\s*(?P<height>[^<]*)\s*</td>\s+<td>\s*(?P<weight>[^<]*)\s*</td>\s+<td>\s*(?P<birthmonth>[0-9]*)/(?P<birthday>[0-9]*)/(?P<birthyear>[0-9]*)\s*</td>\s+<td>\s*(?P<exp>[^<]*)\s*</td>\s+<td>\s*(?P<college>[^<]*)\s*</td>\s*</tr>', data)
         players = []
         self.playerdetails[team] = {}
@@ -405,7 +413,7 @@ class NFLBot(irc.IRCClient):
 
     def rssloop(self, firstrun=False):
         tosay = {}
-        for team, url in self.teamfeeds + self.generalfeeds:
+        for logo, url in self.teamfeeds + self.generalfeeds:
             try:
                 feed = feedparser.parse(url)
             except Exception, e:
@@ -420,17 +428,20 @@ class NFLBot(irc.IRCClient):
                         continue
                     if entry.link not in tosay:
                         tosay[entry.link] = (entry.link, entry.title, datetime(*entry.updated_parsed[0:6]), [])
-                    if team != None:
-                        tosay[entry.link][3].append(team.shortirc())
+                    if logo != None:
+                        tosay[entry.link][3].append(logo)
         nextupdate = timedelta(minutes=15)
         reactor.callLater(nextupdate.seconds, self.rssloop)
         print("Next update will be: %s (in %d seconds)" % (datetime.now() + nextupdate, nextupdate.seconds))
         tosay = tosay.values()
         tosay.sort(lambda x, y: cmp(x[2], y[2]))
-        for link, title, date, teams in tosay:
+        for link, title, date, logos in tosay:
             start = ""
-            if len(teams) > 0:
-                start = "%s: " % ", ".join(teams)
+            if len(logos) > 0:
+                start = "%s: " % ", ".join(logos)
+                print("Start: %s (%r)" % (start, logos))
+            else:
+                print("No logos")
             msg = "%s%s - %s" % (start, title, link)
             self.sayall(msg.encode('utf-8'))
 
